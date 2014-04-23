@@ -1,0 +1,119 @@
+<!doctype html>
+<html class="no-js" lang="en" ng-app="readerApp">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speed Reader</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/foundation.css" />
+    <link rel="stylesheet" href="css/foundation-icons.css" />
+    <script src="js/vendor/modernizr.js"></script>
+  </head>
+  <body ng-controller="ReaderCtrl">
+  <div class="home-screen" ng-show="showHomeScreen">
+    <div class="row">
+      <div class="large-12 columns large-text-center">
+        <h1>Welcome to Speed Reader!</h1>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="large-12 columns">
+      	<div class="panel">
+	        <h3>Insert your text here! </h3>
+
+	        <textarea id="textarea" rows="25" ng-model="text"></textarea>
+
+            <a href="#" class="medium success button right radius" ng-click="launchReaderScreen();">Start reading</a>
+            <div class="clearfix"></div>
+      	</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="speed-reader-screen" ng-show="showReaderScreen">
+      <div class="row">
+          <div class="large-12 columns large-text-center">
+              <h1>Start reading!</h1>
+          </div>
+      </div>
+
+      <div class="row">
+          <div class="large-12 columns large-centered">
+              <div class="panel large-text-center" style="min-height: 300px;">
+                  <span><h1>{{chunk}}</h1></span>
+              </div>
+          </div>
+          <div class="large-12 columns large-text-center">
+              <div class="large-3 columns">
+                  <a href="#" class="medium radius button" ng-click="launchHomeScreen()"><i class="fi-arrow-left"></i> back</a>
+              </div>
+
+              <div class="large-3 columns">
+                  <a href="#" class="medium success radius button" ng-click="playTest();"><i class="fi-play"></i> play</a>
+              </div>
+
+              <div class="large-3 columns">
+                  <a href="#" class="medium alert radius button disabled"><i class="fi-stop"></i> stop</a>
+              </div>
+
+              <div class="large-3 columns">
+                  <a href="#" class="medium radius button" data-reveal-id="configModal"><i class="fi-wrench"></i> settings</a>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div id="configModal" class="reveal-modal" data-reveal>
+      <div class="large-text-center">
+          <h2>Reader Settings</h2>
+          <p class="lead">Tweak the configurations for your speed reading</p>
+
+          <form id="configForm">
+              <div class="row">
+                  <div class="small-8">
+                      <div class="row">
+                          <div class="small-9 columns">
+                              <label for="wordsPerChunk" class="right inline"># of words per Chunk</label>
+                          </div>
+                          <div class="small-3 columns left">
+                              <select id="wordsPerChunk" ng-class="{'validation-error': !config.validWordsPerChunk}">
+                                  <option ng-repeat="value in config.wordsPerChunkValues">
+                                      {{value}}
+                                  </option>
+                              </select>
+                              <small class="validation-error" ng-hide="config.validWordsPerChunk">This value must be a positive integer between 1 and 6</small>
+                          </div>
+                      </div>
+                      <div class="row">
+                          <div class="small-9 columns">
+                              <label for="wordsPerMinute" class="right inline">Words per minute</label>
+                          </div>
+                          <div class="small-3 columns left">
+                              <input ng-class="{'validation-error': !config.validWordsPerMinute}" type="text" id="wordsPerMinute" ng-model="config.wordsPerMinute">
+                              <small class="validation-error" ng-hide="config.validWordsPerMinute"> This value must be a positive integer between 200 and 1000</small>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="row">
+                  <div class="large-12 columns large-text-center">
+                      <br/>
+                      <a href="#" class="medium success radius button" ng-click="saveConfiguration();"><i class="fi-check"></i> save</a>
+                  </div>
+              </div>
+          </form>
+      </div>
+  </div>
+    
+  <script src="js/vendor/jquery.js"></script>
+  <script src="js/foundation.min.js"></script>
+  <script src="js/foundation/foundation.abide.js"></script>
+  <script src="js/angular/angular.min.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    $(document).foundation();
+  </script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+textarea {
+    height: auto;
+}
+
+small.validation-error{
+    font-style: italic;
+    color: red;
+    margin: 10px;
+}
+
+input.validation-error {
+    box-shadow: 0 0 6px red !important;
+}
