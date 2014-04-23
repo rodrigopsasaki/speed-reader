@@ -46,19 +46,23 @@
           </div>
           <div class="large-12 columns large-text-center">
               <div class="large-3 columns">
-                  <a href="#" class="medium radius button" ng-click="launchHomeScreen()"><i class="fi-arrow-left"></i> back</a>
+                  <a id="restartButton" href="#" class="medium radius button" ng-click="restart();"><i class="fi-previous"></i> restart</a>
               </div>
 
               <div class="large-3 columns">
-                  <a href="#" class="medium success radius button" ng-click="playTest();"><i class="fi-play"></i> play</a>
+                  <a id="playButton" href="#" class="medium success radius button" ng-click="play();" ng-hide="playing"><i class="fi-play"></i> play</a>
               </div>
 
               <div class="large-3 columns">
-                  <a href="#" class="medium alert radius button disabled"><i class="fi-stop"></i> stop</a>
+                  <a id="playButton" href="#" class="medium success radius button" ng-click="pause();" ng-show="playing"><i class="fi-pause"></i> pause</a>
               </div>
 
               <div class="large-3 columns">
-                  <a href="#" class="medium radius button" data-reveal-id="configModal"><i class="fi-wrench"></i> settings</a>
+                  <a id="newButton" href="#" class="medium radius button" ng-click="launchHomeScreen()"><i class="fi-page-add"></i> new</a>
+              </div>
+
+              <div class="large-3 columns">
+                  <a id="configButton" href="#" class="medium radius button" data-reveal-id="configModal"><i class="fi-wrench"></i> settings</a>
               </div>
           </div>
       </div>

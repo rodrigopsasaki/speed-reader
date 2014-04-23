@@ -13,6 +13,8 @@ function ReaderCtrl($scope, $timeout){
             + "One other setting that's worth mentioning in this introduction is the chunk size – the which is the number of words that are flashed at each interval on the screen. When you read aloud, you can only say one word at a time. However, this limit does not apply to speed reading. Once your inner voice subsides and with constant practice, you can read multiple words at a time. This is the best way to achieve reading speeds of 1000+ wpm. Start small with 2 word chunk sizes and find out that as you increase, 3,4, or even higher chunk sizes are possible.\n\n"
             + "Good luck!";
 
+    $scope.playing = false;
+
     $scope.splitText = [];
 
     $scope.showHomeScreen = true;
@@ -34,29 +36,40 @@ function ReaderCtrl($scope, $timeout){
     $scope.chunk = '';
     
     $scope.getNextChunk = function(){
-        $scope.chunk = '';
-        for(var i = $scope.counter ; i < $scope.wordsPerChunk ; i++){
-            $scope.chunk = $scope.chunk + $scope.splitText[i]; 
+        this.chunk = '';
+        for(var i = this.counter ; i < this.wordsPerChunk && hasMoreWords(); i++){
+            this.chunk = this.chunk + ' ' + this.getNextWord();
         }
-        $scope.counter = $scope.counter + $scope.wordsPerChunk;
-    }
+    };
 
     $scope.getNextWord = function(){
         var word = this.splitText[this.counter];
         this.counter = this.counter + 1;
         return word;
+    };
+
+    $scope.play = function(){
+        disable('restartButton');
+        $scope.playing = true;
+        $scope.playLoop();
     }
 
-    $scope.playTest = function(){
-        play();
+    $scope.pause = function(){
+        enable('restartButton');
+        $scope.playing = false;
     }
 
-    var play = function(){
-        if(hasMoreWords()) {
-            $scope.word = $scope.getNextWord();
-            $timeout(play, (1000 / ($scope.config.wordsPerMinute / 60)) * $scope.config.wordsPerChunk);
+    $scope.restart = function(){
+        $scope.counter = 0;
+        $scope.chunk = $scope.getNextWord();
+    }
+
+    $scope.playLoop = function(){
+        if(hasMoreWords() && $scope.playing == true) {
+            $scope.chunk = $scope.getNextWord();
+            $timeout($scope.playLoop, (1000 / ($scope.config.wordsPerMinute / 60)) * $scope.config.wordsPerChunk);
         }
-    }
+    };
 
     function hasMoreWords(){
         return $scope.counter < $scope.splitText.length;
@@ -66,14 +79,13 @@ function ReaderCtrl($scope, $timeout){
         $scope.showHomeScreen = false;
         $scope.showReaderScreen = true;
         splitText($scope.text);
-        $scope.word = this.splitText[0];
-        alert(this.splitText.length);
-    }
+        $scope.chunk = $scope.getNextWord();
+    };
 
     $scope.launchHomeScreen = function(){
         $scope.showHomeScreen = true;
         $scope.showReaderScreen = false;
-    }
+    };
 
     function splitText(t){
 //        $scope.splitText = t.replace(/[,!?-_]/, ' ');
@@ -86,9 +98,11 @@ function ReaderCtrl($scope, $timeout){
 
     $scope.saveConfiguration = function(){
         if(validWordsPerChunk() & validWordsPerMinute()){
+            $scope.counter = 0;
+            $scope.chunk = $scope.getNextChunk();
             closeConfigModal();
         }
-    }
+    };
 
     function validWordsPerChunk(){
         var e = angular.element('#wordsPerChunk');
@@ -107,6 +121,15 @@ function ReaderCtrl($scope, $timeout){
         $scope.config.validWordsPerMinute = valid;
         return valid;
     }
+
+    function disable(id){
+        angular.element('#' + id).addClass('disabled')
+    }
+
+    function enable(id){
+        angular.element('#' + id).removeClass('disabled');
+    }
+
 }
 
 function isInteger(n) {
