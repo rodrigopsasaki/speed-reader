@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/foundation.css" />
     <link rel="stylesheet" href="css/foundation-icons.css" />
+    <link rel="stylesheet" href="css/jquery.nouislider.css" />
     <script src="js/vendor/modernizr.js"></script>
   </head>
   <body ng-controller="ReaderCtrl">
@@ -34,35 +35,40 @@
   <div class="speed-reader-screen" ng-show="showReaderScreen">
       <div class="row">
           <div class="large-12 columns large-text-center">
-              <h1>Start reading!</h1>
+              <h1><small>Start reading!</small></h1>
           </div>
       </div>
 
       <div class="row">
           <div class="large-12 columns large-centered">
               <div class="panel large-text-center" style="min-height: 300px;">
+                  <br/> <br/> <br/> <br/> <br />
                   <span><h1>{{chunk}}</h1></span>
               </div>
           </div>
-          <div class="large-12 columns large-text-center">
-              <div class="large-3 columns">
-                  <a id="restartButton" href="#" class="medium radius button" ng-click="restart();"><i class="fi-previous"></i> restart</a>
+          <div class="large-12 columns ">
+              <div class="large-2 columns">
+                  <a id="restartButton" href="#" class="small radius button" ng-click="player.restart();"><i class="fi-previous"></i> restart</a>
               </div>
 
-              <div class="large-3 columns">
-                  <a id="playButton" href="#" class="medium success radius button" ng-click="play();" ng-hide="playing"><i class="fi-play"></i> play</a>
+              <div class="large-2 columns">
+                  <a id="playButton" href="#" class="small success radius button" ng-click="player.play();" ng-hide="player.playing"><i class="fi-play"></i> play</a>
               </div>
 
-              <div class="large-3 columns">
-                  <a id="playButton" href="#" class="medium success radius button" ng-click="pause();" ng-show="playing"><i class="fi-pause"></i> pause</a>
+              <div class="large-2 columns">
+                  <a id="pauseButton" href="#" class="small success radius button" ng-click="player.pause();" ng-show="player.playing"><i class="fi-pause"></i> pause</a>
               </div>
 
-              <div class="large-3 columns">
-                  <a id="newButton" href="#" class="medium radius button" ng-click="launchHomeScreen()"><i class="fi-page-add"></i> new</a>
+              <div class="large-4 columns" style="vertical-align: middle">
+                  <div id="slider"></div>
               </div>
 
-              <div class="large-3 columns">
-                  <a id="configButton" href="#" class="medium radius button" data-reveal-id="configModal"><i class="fi-wrench"></i> settings</a>
+              <div class="large-2 columns">
+                  <a id="newButton" href="#" class="small radius button" ng-click="launchHomeScreen()"><i class="fi-page-add"></i> new</a>
+              </div>
+
+              <div class="large-2 columns">
+                  <a id="configButton" href="#" class="small radius button" data-reveal-id="configModal"><i class="fi-wrench"></i> settings</a>
               </div>
           </div>
       </div>
@@ -113,8 +119,9 @@
     
   <script src="js/vendor/jquery.js"></script>
   <script src="js/foundation.min.js"></script>
-  <script src="js/foundation/foundation.abide.js"></script>
+  <script src="js/foundation/foundation.slider.js"></script>
   <script src="js/angular/angular.min.js"></script>
+  <script src="js/nouislider/jquery.nouislider.min.js"></script>
   <script src="js/main.js"></script>
   <script>
     $(document).foundation();

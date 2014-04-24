@@ -13,7 +13,49 @@ function ReaderCtrl($scope, $timeout){
             + "One other setting that's worth mentioning in this introduction is the chunk size – the which is the number of words that are flashed at each interval on the screen. When you read aloud, you can only say one word at a time. However, this limit does not apply to speed reading. Once your inner voice subsides and with constant practice, you can read multiple words at a time. This is the best way to achieve reading speeds of 1000+ wpm. Start small with 2 word chunk sizes and find out that as you increase, 3,4, or even higher chunk sizes are possible.\n\n"
             + "Good luck!";
 
-    $scope.playing = false;
+    $scope.player = {
+        playing: false,
+        slider: {
+            getSlider: function(){
+                return angular.element('#slider');
+            },
+            updateSlider: function(){
+                $scope.player.slider.getSlider().val($scope.player.getProgressPercentage());
+            },
+            updateDisplay: function(){
+                $scope.counter = $scope.player.getCounterPositionByPercentage($scope.player.slider.getSlider().val());
+                $scope.chunk = $scope.getNextWord();
+                $scope.$apply();
+            }
+        },
+        getProgressPercentage: function(){
+            return parseInt($scope.counter * 100 / $scope.splitText.length);
+        },
+        getCounterPositionByPercentage: function(percentage){
+            return parseInt((percentage * $scope.splitText.length) / 100 - 1);
+        },
+        play: function(){
+            disable('restartButton');
+            $scope.player.playing = true;
+            $scope.player.playLoop();
+        },
+        playLoop: function(){
+            if($scope.hasMoreWords() && $scope.player.playing == true) {
+                $scope.chunk = $scope.getNextWord();
+                $scope.player.slider.updateSlider();
+                $timeout($scope.player.playLoop, (1000 / ($scope.config.wordsPerMinute / 60)) * $scope.config.wordsPerChunk);
+            }
+        },
+        pause: function(){
+            enable('restartButton');
+            $scope.player.playing = false;
+        },
+        restart: function(){
+            $scope.counter = 0;
+            $scope.chunk = $scope.getNextWord();
+            $scope.player.slider.updateSlider();
+        }
+    }
 
     $scope.splitText = [];
 
@@ -48,30 +90,7 @@ function ReaderCtrl($scope, $timeout){
         return word;
     };
 
-    $scope.play = function(){
-        disable('restartButton');
-        $scope.playing = true;
-        $scope.playLoop();
-    }
-
-    $scope.pause = function(){
-        enable('restartButton');
-        $scope.playing = false;
-    }
-
-    $scope.restart = function(){
-        $scope.counter = 0;
-        $scope.chunk = $scope.getNextWord();
-    }
-
-    $scope.playLoop = function(){
-        if(hasMoreWords() && $scope.playing == true) {
-            $scope.chunk = $scope.getNextWord();
-            $timeout($scope.playLoop, (1000 / ($scope.config.wordsPerMinute / 60)) * $scope.config.wordsPerChunk);
-        }
-    };
-
-    function hasMoreWords(){
+    $scope.hasMoreWords = function(){
         return $scope.counter < $scope.splitText.length;
     }
 
@@ -88,7 +107,6 @@ function ReaderCtrl($scope, $timeout){
     };
 
     function splitText(t){
-//        $scope.splitText = t.replace(/[,!?-_]/, ' ');
         $scope.splitText = t.split(/\s+/);
     }
 
@@ -99,7 +117,7 @@ function ReaderCtrl($scope, $timeout){
     $scope.saveConfiguration = function(){
         if(validWordsPerChunk() & validWordsPerMinute()){
             $scope.counter = 0;
-            $scope.chunk = $scope.getNextChunk();
+            $scope.chunk = $scope.getNextWord();
             closeConfigModal();
         }
     };
@@ -130,8 +148,30 @@ function ReaderCtrl($scope, $timeout){
         angular.element('#' + id).removeClass('disabled');
     }
 
+    //Necessary code to start and configure the slider
+    angular.element("#slider").noUiSlider({
+        start: 0,
+        step: 1,
+        connect: 'lower',
+        range: {
+            'min': 0,
+            'max': 100
+        }
+    });
+
+    // Callback method
+    angular.element("#slider").on({
+        slide: function(){
+            $scope.player.slider.updateDisplay();
+        },
+        change: function(){
+            $scope.player.slider.updateDisplay();
+        }
+    })
+
 }
 
 function isInteger(n) {
     return !isNaN(parseInt(n)) && isFinite(n) && n == parseInt(n);
 }
+
