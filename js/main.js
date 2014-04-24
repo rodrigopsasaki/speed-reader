@@ -143,8 +143,8 @@ function ReaderCtrl($scope, $timeout){
         validation: {
             validWordsPerChunk: function(){
                 var e = angular.element('#wordsPerChunk');
-                var value = e.val();
-                var valid = isInteger(value) && value >= 1 && value <= 6;
+                var value = parseInt(e.val()) + 1;
+                var valid = isInteger(value) && value > 0 && value <= 6;
 
                 $scope.config.validWordsPerChunk = valid;
                 return valid;
@@ -180,6 +180,20 @@ function ReaderCtrl($scope, $timeout){
             $scope.player.slider.updateDisplay();
         }
     })
+
+    //Sticking the footer on the bottom of the page
+    angular.element(window).bind("load", function () {
+        var footer = $("#footer");
+        var pos = footer.position();
+        var height = $(window).height();
+        height = height - pos.top;
+        height = height - footer.height();
+        if (height > 0) {
+            footer.css({
+                'margin-top': height + 'px'
+            });
+        }
+    });
 
     //initializing main text
     function init(){
