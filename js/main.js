@@ -2,7 +2,52 @@ var readerApp = angular.module("readerApp", []);
 
 function ReaderCtrl($scope, $timeout){
 
-    $scope.text = "Speed reading is the art of silencing subvocalization. Most readers have an average reading speed of 200 wpm, which is about as fast as they can read a passage out loud. This is no coincidence. It is their inner voice that paces through the text that keeps them from achieving higher reading speeds. They can only read as fast as they can speak because that's the way they were taught to read, through reading systems like Hooked on Phonics.\n\n"
+    $scope.player = {
+        playing: false,
+        slider: {
+            getSlider: function(){
+                return angular.element('#slider');
+            },
+            updateSlider: function(){
+                $scope.player.slider.getSlider().val($scope.textController.getProgressPercentage());
+            },
+            updateDisplay: function(){
+                $scope.textController.counter = $scope.player.getCounterPositionByPercentage($scope.player.slider.getSlider().val());
+                $scope.textController.showNextChunk();
+                $scope.$apply();
+            }
+        },
+        getCounterPositionByPercentage: function(percentage){
+            if(percentage == 100){
+                return $scope.textController.splitText.length - 1;
+            }
+            return parseInt((percentage * $scope.textController.splitText.length) / 100);
+        },
+        play: function(){
+            $scope.player.playing = true;
+            $scope.player.playLoop();
+        },
+        playLoop: function(){
+            if($scope.textController.hasMoreWords() && $scope.player.playing == true) {
+                $scope.textController.showNextChunk();
+                $scope.player.slider.updateSlider();
+                $timeout($scope.player.playLoop, (1000 / ($scope.config.wordsPerMinute / 60)) * $scope.config.wordsPerChunk);
+            } else {
+                $scope.player.playing = false;
+            }
+        },
+        pause: function(){
+            $scope.player.playing = false;
+        },
+        restart: function(){
+            $scope.player.textAlreadyReadAlert = false;
+            $scope.textController.init();
+            $scope.player.slider.updateSlider();
+        }
+    };
+
+    $scope.textController = {
+        rawText: "Speed reading is the art of silencing subvocalization. Most readers have an average reading speed of 200 wpm, which is about as fast as they can read a passage out loud. This is no coincidence. It is their inner voice that paces through the text that keeps them from achieving higher reading speeds. They can only read as fast as they can speak because that's the way they were taught to read, through reading systems like Hooked on Phonics.\n\n"
             + "However, it is entirely possible to read at a much greater speed, with much better reading comprehension, by silencing this inner voice. The solution is simple - absorb the reading material faster than that inner voice can keep up.\n\n"
             + "In the real world, speed reading is achieved through methods like reading passages using a finger to point your way. You read through a page of text by following your finger line by line at a speed faster than you can normally read. This works because the eye is very good at tracking movement. Even if at this point full reading comprehension is lost, it's exactly this method of training that will allow you to read faster.\n\n"
             + "With the aid of software like Spreeder, it's much easier to achieve this same result with much less effort. Load a passage of text (like this one), and the software will pace through the text at a predefined speed that you can adjust as your reading comprehension increases.\n\n"
@@ -11,58 +56,56 @@ function ReaderCtrl($scope, $timeout){
             + "Now, reread the passage again at your base rate. It should feel a lot slower – if not, try running the speed test again. Now try moving up a little past your base rate – for example, at 400 wpm – and see how much you can comprehend at that speed.\n\n"
             + "That's basically it - constantly read passages at a rate faster than you can keep up, and keep pushing the edge of what you're capable of. You'll find that when you drop down to lower speeds, you'll be able to pick up much more than you would have thought possible.\n\n"
             + "One other setting that's worth mentioning in this introduction is the chunk size – the which is the number of words that are flashed at each interval on the screen. When you read aloud, you can only say one word at a time. However, this limit does not apply to speed reading. Once your inner voice subsides and with constant practice, you can read multiple words at a time. This is the best way to achieve reading speeds of 1000+ wpm. Start small with 2 word chunk sizes and find out that as you increase, 3,4, or even higher chunk sizes are possible.\n\n"
-            + "Good luck!";
-
-    $scope.player = {
-        playing: false,
-        slider: {
-            getSlider: function(){
-                return angular.element('#slider');
-            },
-            updateSlider: function(){
-                $scope.player.slider.getSlider().val($scope.player.getProgressPercentage());
-            },
-            updateDisplay: function(){
-                $scope.counter = $scope.player.getCounterPositionByPercentage($scope.player.slider.getSlider().val());
-                $scope.chunk = $scope.getNextWord();
-                $scope.$apply();
+            + "Good luck!",
+        splitText: [],
+        chunk: '',
+        counter: 0,
+        wordsPerChunk: 1,
+        wordsPerMinute: 300,
+        showNextChunk: function(){
+            $scope.textController.chunk = $scope.textController.getNextWord();
+        },
+        getNextChunk: function(){
+            $scope.textController.chunk = '';
+            for(var i = $scope.textController.counter ; i < $scope.textController.wordsPerChunk && $scope.textController.hasMoreWords(); i++){
+                $scope.textController.chunk = $scope.textController.chunk + ' ' + $scope.textController.getNextWord();
             }
+        },
+        getNextWord: function(){
+            var word = $scope.textController.splitText[$scope.textController.counter];
+            $scope.textController.counter = $scope.textController.counter + 1;
+            return word;
+        },
+        init: function(){
+            $scope.textController.counter = 0;
+            $scope.textController.breakRawText();
+            $scope.textController.showNextChunk();
+        },
+        breakRawText: function(){
+            $scope.textController.splitText = $scope.textController.rawText.split(/\s+/);
+        },
+        hasMoreWords: function(){
+            return $scope.textController.counter < $scope.textController.splitText.length;
         },
         getProgressPercentage: function(){
-            return parseInt($scope.counter * 100 / $scope.splitText.length);
-        },
-        getCounterPositionByPercentage: function(percentage){
-            return parseInt((percentage * $scope.splitText.length) / 100 - 1);
-        },
-        play: function(){
-            disable('restartButton');
-            $scope.player.playing = true;
-            $scope.player.playLoop();
-        },
-        playLoop: function(){
-            if($scope.hasMoreWords() && $scope.player.playing == true) {
-                $scope.chunk = $scope.getNextWord();
-                $scope.player.slider.updateSlider();
-                $timeout($scope.player.playLoop, (1000 / ($scope.config.wordsPerMinute / 60)) * $scope.config.wordsPerChunk);
-            }
-        },
-        pause: function(){
-            enable('restartButton');
-            $scope.player.playing = false;
-        },
-        restart: function(){
-            $scope.counter = 0;
-            $scope.chunk = $scope.getNextWord();
-            $scope.player.slider.updateSlider();
+            return parseInt($scope.textController.counter * 100 / $scope.textController.splitText.length);
         }
     }
 
-    $scope.splitText = [];
-
-    $scope.showHomeScreen = true;
-    $scope.showReaderScreen= false;
-
-    $scope.validationClass = '';
+    $scope.navigation = {
+        showHomeScreen: true,
+        showReaderScreen: false,
+        launchReaderScreen: function(){
+            $scope.navigation.showHomeScreen = false;
+            $scope.navigation.showReaderScreen = true;
+            $scope.textController.init();
+        },
+        launchHomeScreen: function(){
+            $scope.navigation.showHomeScreen = true;
+            $scope.navigation.showReaderScreen = false;
+            $scope.player.pause();
+        }
+    }
 
     $scope.config = {
         wordsPerChunkValues: [1, 2, 3, 4, 5, 6],
@@ -70,75 +113,45 @@ function ReaderCtrl($scope, $timeout){
         wordsPerMinute: 200,
         valid: true,
         validWordsPerChunk: true,
-        validWordsPerMinute: true
-    };
+        validWordsPerMinute: true,
+        initConfigModal: function(){
+            $scope.config.validWordsPerChunk = true;
+            $scope.config.validWordsPerMinute = true;
+            $scope.config.wordsPerChunk = $scope.textController.wordsPerChunk;
+            $scope.config.wordsPerMinute = $scope.textController.wordsPerMinute;
+            $scope.player.pause();
+        },
+        closeConfigModal: function(){
+            angular.element('#configModal').foundation('reveal', 'close');
+        },
+        saveConfiguration: function(){
+            if($scope.config.validation.validWordsPerChunk() & $scope.config.validation.validWordsPerMinute()){
+                $scope.textController.init();
+                $scope.textController.wordsPerChunk = $scope.config.wordsPerChunk;
+                $scope.textController.wordsPerMinute = $scope.config.wordsPerMinute;
+                $scope.player.slider.updateSlider();
+                $scope.config.closeConfigModal();
+            }
+        },
+        validation: {
+            validWordsPerChunk: function(){
+                var e = angular.element('#wordsPerChunk');
+                var value = e.val();
+                var valid = isInteger(value) && value >= 1 && value <= 6;
 
-    $scope.counter = 0;
+                $scope.config.validWordsPerChunk = valid;
+                return valid;
+            },
+            validWordsPerMinute: function(){
+                var e = angular.element('#wordsPerMinute');
+                var value = e.val();
+                var valid = isInteger(value) && value >= 200 && value <= 1000;
 
-    $scope.chunk = '';
-    
-    $scope.getNextChunk = function(){
-        this.chunk = '';
-        for(var i = this.counter ; i < this.wordsPerChunk && hasMoreWords(); i++){
-            this.chunk = this.chunk + ' ' + this.getNextWord();
+                $scope.config.validWordsPerMinute = valid;
+                return valid;
+            }
         }
     };
-
-    $scope.getNextWord = function(){
-        var word = this.splitText[this.counter];
-        this.counter = this.counter + 1;
-        return word;
-    };
-
-    $scope.hasMoreWords = function(){
-        return $scope.counter < $scope.splitText.length;
-    }
-
-    $scope.launchReaderScreen = function(){
-        $scope.showHomeScreen = false;
-        $scope.showReaderScreen = true;
-        splitText($scope.text);
-        $scope.chunk = $scope.getNextWord();
-    };
-
-    $scope.launchHomeScreen = function(){
-        $scope.showHomeScreen = true;
-        $scope.showReaderScreen = false;
-    };
-
-    function splitText(t){
-        $scope.splitText = t.split(/\s+/);
-    }
-
-    function closeConfigModal(){
-        angular.element('#configModal').foundation('reveal', 'close');
-    }
-
-    $scope.saveConfiguration = function(){
-        if(validWordsPerChunk() & validWordsPerMinute()){
-            $scope.counter = 0;
-            $scope.chunk = $scope.getNextWord();
-            closeConfigModal();
-        }
-    };
-
-    function validWordsPerChunk(){
-        var e = angular.element('#wordsPerChunk');
-        var value = e.val();
-        var valid = isInteger(value) && value >= 1 && value <= 6;
-
-        $scope.config.validWordsPerChunk = valid;
-        return valid;
-    }
-
-    function validWordsPerMinute(){
-        var e = angular.element('#wordsPerMinute');
-        var value = e.val();
-        var valid = isInteger(value) && value >= 200 && value <= 1000;
-
-        $scope.config.validWordsPerMinute = valid;
-        return valid;
-    }
 
     function disable(id){
         angular.element('#' + id).addClass('disabled')
