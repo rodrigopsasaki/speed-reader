@@ -47,7 +47,7 @@ function ReaderCtrl($scope, $timeout){
     };
 
     $scope.textController = {
-        rawText: "Speed reading is the art of silencing subvocalization. Most readers have an average reading speed of 200 wpm, which is about as fast as they can read a passage out loud. This is no coincidence. It is their inner voice that paces through the text that keeps them from achieving higher reading speeds. They can only read as fast as they can speak because that's the way they were taught to read, through reading systems like Hooked on Phonics.\n\n"
+        defaultText: "Speed reading is the art of silencing subvocalization. Most readers have an average reading speed of 200 wpm, which is about as fast as they can read a passage out loud. This is no coincidence. It is their inner voice that paces through the text that keeps them from achieving higher reading speeds. They can only read as fast as they can speak because that's the way they were taught to read, through reading systems like Hooked on Phonics.\n\n"
             + "However, it is entirely possible to read at a much greater speed, with much better reading comprehension, by silencing this inner voice. The solution is simple - absorb the reading material faster than that inner voice can keep up.\n\n"
             + "In the real world, speed reading is achieved through methods like reading passages using a finger to point your way. You read through a page of text by following your finger line by line at a speed faster than you can normally read. This works because the eye is very good at tracking movement. Even if at this point full reading comprehension is lost, it's exactly this method of training that will allow you to read faster.\n\n"
             + "With the aid of software like Spreeder, it's much easier to achieve this same result with much less effort. Load a passage of text (like this one), and the software will pace through the text at a predefined speed that you can adjust as your reading comprehension increases.\n\n"
@@ -57,19 +57,23 @@ function ReaderCtrl($scope, $timeout){
             + "That's basically it - constantly read passages at a rate faster than you can keep up, and keep pushing the edge of what you're capable of. You'll find that when you drop down to lower speeds, you'll be able to pick up much more than you would have thought possible.\n\n"
             + "One other setting that's worth mentioning in this introduction is the chunk size – the which is the number of words that are flashed at each interval on the screen. When you read aloud, you can only say one word at a time. However, this limit does not apply to speed reading. Once your inner voice subsides and with constant practice, you can read multiple words at a time. This is the best way to achieve reading speeds of 1000+ wpm. Start small with 2 word chunk sizes and find out that as you increase, 3,4, or even higher chunk sizes are possible.\n\n"
             + "Good luck!",
+        rawText: '',
         splitText: [],
         chunk: '',
         counter: 0,
         wordsPerChunk: 1,
         wordsPerMinute: 300,
         showNextChunk: function(){
-            $scope.textController.chunk = $scope.textController.getNextWord();
+            $scope.textController.chunk = $scope.textController.getNextChunk();
         },
         getNextChunk: function(){
-            $scope.textController.chunk = '';
-            for(var i = $scope.textController.counter ; i < $scope.textController.wordsPerChunk && $scope.textController.hasMoreWords(); i++){
-                $scope.textController.chunk = $scope.textController.chunk + ' ' + $scope.textController.getNextWord();
+            var tempChunk = '';
+            var currentCounter = $scope.textController.counter;
+            for(var i = currentCounter ; i < (currentCounter + $scope.textController.wordsPerChunk) && $scope.textController.hasMoreWords(); i++){
+                var word = $scope.textController.getNextWord();
+                tempChunk = tempChunk + ' ' + word;
             }
+            return tempChunk;
         },
         getNextWord: function(){
             var word = $scope.textController.splitText[$scope.textController.counter];
@@ -89,6 +93,9 @@ function ReaderCtrl($scope, $timeout){
         },
         getProgressPercentage: function(){
             return parseInt($scope.textController.counter * 100 / $scope.textController.splitText.length);
+        },
+        resetTextToDefault: function(){
+            $scope.textController.rawText = $scope.textController.defaultText;
         }
     }
 
@@ -126,9 +133,9 @@ function ReaderCtrl($scope, $timeout){
         },
         saveConfiguration: function(){
             if($scope.config.validation.validWordsPerChunk() & $scope.config.validation.validWordsPerMinute()){
-                $scope.textController.init();
                 $scope.textController.wordsPerChunk = $scope.config.wordsPerChunk;
                 $scope.textController.wordsPerMinute = $scope.config.wordsPerMinute;
+                $scope.textController.init();
                 $scope.player.slider.updateSlider();
                 $scope.config.closeConfigModal();
             }
@@ -153,14 +160,6 @@ function ReaderCtrl($scope, $timeout){
         }
     };
 
-    function disable(id){
-        angular.element('#' + id).addClass('disabled')
-    }
-
-    function enable(id){
-        angular.element('#' + id).removeClass('disabled');
-    }
-
     //Necessary code to start and configure the slider
     angular.element("#slider").noUiSlider({
         start: 0,
@@ -181,6 +180,12 @@ function ReaderCtrl($scope, $timeout){
             $scope.player.slider.updateDisplay();
         }
     })
+
+    //initializing main text
+    function init(){
+        $scope.textController.resetTextToDefault();
+    }
+    init();
 
 }
 

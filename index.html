@@ -25,7 +25,12 @@
 
 	        <textarea id="textarea" rows="25" ng-model="textController.rawText"></textarea>
 
-            <a href="#" class="medium success button right radius" ng-click="navigation.launchReaderScreen();">Start reading</a>
+            <div class="large-3 columns right">
+                <a href="#" class="medium success button right radius" ng-click="navigation.launchReaderScreen();">Start reading</a>
+            </div>
+            <div class="large-3 columns right">
+                <a href="#" class="medium button right radius" ng-click="textController.resetTextToDefault();">Default text</a>
+            </div>
             <div class="clearfix"></div>
       	</div>
       </div>
@@ -41,12 +46,22 @@
 
       <div class="row">
           <div class="large-12 columns large-centered">
-              <div class="panel large-text-center" style="min-height: 300px;">
+              <div class="panel large-text-center wordwrap" style="min-height: 300px;">
                   <br/> <br/> <br/> <br/> <br />
                   <span><h1>{{textController.chunk}}</h1></span>
               </div>
           </div>
       </div>
+      <div class="row">
+          <div class="large-12 columns large-text-center">
+              <p>Reading <strong>{{textController.splitText.length}}</strong> words
+                  at <strong>{{textController.wordsPerMinute}}</strong>wpm
+                  split into chunks of <strong>{{textController.wordsPerChunk}}</strong>
+              </p>
+          </div>
+          <br/>
+      </div>
+      <div class="clearfix"></div>
       <div class="row">
           <div class="large-12 columns ">
               <div class="large-2 columns">
@@ -89,10 +104,8 @@
                               <label for="wordsPerChunk" class="right inline"># of words per Chunk</label>
                           </div>
                           <div class="small-3 columns left">
-                              <select id="wordsPerChunk" ng-class="{'validation-error': !config.validWordsPerChunk}">
-                                  <option ng-repeat="value in config.wordsPerChunkValues">
-                                      {{value}}
-                                  </option>
+                              <select id="wordsPerChunk" ng-class="{'validation-error': !config.validWordsPerChunk}"
+                                      ng-model="config.wordsPerChunk" ng-options="value for value in config.wordsPerChunkValues">
                               </select>
                               <small class="validation-error" ng-hide="config.validWordsPerChunk">This value must be a positive integer between 1 and 6</small>
                           </div>
